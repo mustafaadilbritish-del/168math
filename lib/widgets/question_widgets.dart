@@ -19,24 +19,7 @@ class TypeAnswerWidget extends StatefulWidget {
 }
 
 class _TypeAnswerWidgetState extends State<TypeAnswerWidget> {
-  final TextEditingController _controller = TextEditingController();
-  final FocusNode _focusNode = FocusNode();
-
-  @override
-  void initState() {
-    super.initState();
-    // Auto-focus the input field
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _focusNode.requestFocus();
-    });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    _focusNode.dispose();
-    super.dispose();
-  }
+  String _inputValue = '';
 
   @override
   Widget build(BuildContext context) {
@@ -79,62 +62,80 @@ class _TypeAnswerWidgetState extends State<TypeAnswerWidget> {
           ),
         ),
         
-        const SizedBox(height: 40),
+        const SizedBox(height: 30),
         
-        // Answer input
-        SizedBox(
-          width: widget.isTablet ? 200 : 150,
-          child: TextField(
-            controller: _controller,
-            focusNode: _focusNode,
-            keyboardType: TextInputType.number,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: widget.isTablet ? 32 : 24,
-              fontWeight: FontWeight.bold,
-              color: const Color(0xFF1976D2),
-            ),
-            decoration: InputDecoration(
-              hintText: '?',
-              hintStyle: TextStyle(
-                color: Colors.grey[400],
-                fontSize: widget.isTablet ? 32 : 24,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
-                borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
-                borderSide: const BorderSide(color: Color(0xFF1976D2), width: 3),
-              ),
-              filled: true,
-              fillColor: Colors.white,
-              contentPadding: EdgeInsets.symmetric(
-                vertical: widget.isTablet ? 20 : 15,
-                horizontal: 20,
+        // Display input
+        Container(
+          width: widget.isTablet ? 200 : 160,
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(15),
+            border: Border.all(color: const Color(0xFF1976D2), width: 2),
+          ),
+          child: Center(
+            child: Text(
+              _inputValue.isEmpty ? '?' : _inputValue,
+              style: TextStyle(
+                fontSize: widget.isTablet ? 32 : 26,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF1976D2),
               ),
             ),
-            onSubmitted: (value) {
-              if (value.isNotEmpty) {
-                widget.onSubmit(value);
-              }
-            },
           ),
         ),
         
-        const SizedBox(height: 40),
+        const SizedBox(height: 20),
+        
+        // Number keypad
+        SizedBox(
+          width: widget.isTablet ? 320 : 260,
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: ['1','2','3'].map((d) => _buildDigitButton(d)).toList(),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: ['4','5','6'].map((d) => _buildDigitButton(d)).toList(),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: ['7','8','9'].map((d) => _buildDigitButton(d)).toList(),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildActionButton('CLEAR', onPressed: () {
+                    setState(() => _inputValue = '');
+                  }),
+                  _buildDigitButton('0'),
+                  _buildActionButton('⌫', onPressed: () {
+                    if (_inputValue.isNotEmpty) {
+                      setState(() => _inputValue = _inputValue.substring(0, _inputValue.length - 1));
+                    }
+                  }),
+                ],
+              ),
+            ],
+          ),
+        ),
+        
+        const SizedBox(height: 30),
         
         // Submit button
         SizedBox(
           width: widget.isTablet ? 200 : 150,
           child: ElevatedButton(
-            onPressed: () {
-              if (_controller.text.isNotEmpty) {
-                widget.onSubmit(_controller.text);
-              }
-            },
+            onPressed: _inputValue.isNotEmpty
+                ? () {
+                    widget.onSubmit(_inputValue);
+                  }
+                : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF4CAF50),
               padding: EdgeInsets.symmetric(vertical: widget.isTablet ? 15 : 12),
@@ -153,6 +154,61 @@ class _TypeAnswerWidgetState extends State<TypeAnswerWidget> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildDigitButton(String digit) {
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        child: ElevatedButton(
+          onPressed: () {
+            setState(() => _inputValue = _inputValue + digit);
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.white,
+            foregroundColor: const Color(0xFF1976D2),
+            padding: EdgeInsets.symmetric(vertical: widget.isTablet ? 16 : 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: const BorderSide(color: Color(0xFF1976D2), width: 2),
+            ),
+          ),
+          child: Text(
+            digit,
+            style: TextStyle(
+              fontSize: widget.isTablet ? 22 : 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton(String label, {required VoidCallback onPressed}) {
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        child: ElevatedButton(
+          onPressed: onPressed,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF2196F3),
+            foregroundColor: Colors.white,
+            padding: EdgeInsets.symmetric(vertical: widget.isTablet ? 16 : 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: widget.isTablet ? 16 : 14,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -338,34 +394,25 @@ class _FollowPatternWidgetState extends State<FollowPatternWidget> {
   }
 
   void _generatePatternData() {
-    final table = widget.question.multiplicand;
-    final targetMultiplier = widget.question.multiplier;
-    
-    // Create a pattern with 3 examples and 1 missing
+    final int table = widget.question.multiplicand;
+    final int targetMultiplier = widget.question.multiplier;
+    const int maxMultiplier = 30;
+
     patternData = [];
-    
-    // Add 2 examples before the target
-    for (int i = 1; i <= 2; i++) {
-      patternData.add({
-        'equation': '$table ÷ $table',
-        'answer': i,
-        'isTarget': false,
-      });
+
+    int start = targetMultiplier - 2;
+    if (start < 1) start = 1;
+    if (start + 3 > maxMultiplier) {
+      start = (maxMultiplier - 3).clamp(1, maxMultiplier - 3);
     }
-    
-    // Add the target question (missing answer)
-    patternData.add({
-      'equation': '${table * targetMultiplier} ÷ $table',
-      'answer': null,
-      'isTarget': true,
-    });
-    
-    // Add one more example after
-    if (targetMultiplier < 12) {
+
+    for (int i = 0; i < 4; i++) {
+      final int m = start + i;
+      final bool isTarget = (m == targetMultiplier);
       patternData.add({
-        'equation': '${table * (targetMultiplier + 1)} ÷ $table',
-        'answer': targetMultiplier + 1,
-        'isTarget': false,
+        'equation': '${table} × ${m}',
+        'answer': isTarget ? null : table * m,
+        'isTarget': isTarget,
       });
     }
   }

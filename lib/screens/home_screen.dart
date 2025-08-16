@@ -12,6 +12,12 @@ class _HomeScreenState extends State<HomeScreen> {
   final AppState appState = AppState();
 
   @override
+  void initState() {
+    super.initState();
+    appState.resetLives();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
     final isTablet = screenSize.width > 600;
@@ -257,7 +263,7 @@ class _HomeScreenState extends State<HomeScreen> {
               )
             else
               Text(
-                '${(progress * 12).round()}/12',
+                '${(progress * (appState.tableProgress[tableNumber]?.totalQuestions ?? 30)).round()}/${appState.tableProgress[tableNumber]?.totalQuestions ?? 30}',
                 style: TextStyle(
                   fontSize: isTablet ? 14 : 12,
                   color: Colors.white,

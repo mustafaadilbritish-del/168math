@@ -79,8 +79,8 @@ class _LessonScreenState extends State<LessonScreen>
     questions.clear();
     final random = Random();
     
-    // Generate 12 questions for the multiplication table
-    for (int i = 1; i <= 12; i++) {
+    // Generate 30 questions for the multiplication table
+    for (int i = 1; i <= 30; i++) {
       final questionType = _getRandomQuestionType(random);
       List<int>? choices;
       
@@ -114,18 +114,19 @@ class _LessonScreenState extends State<LessonScreen>
 
   List<int> _generateChoices(int correctAnswer, Random random) {
     final choices = <int>[correctAnswer];
+    final int maxAnswer = tableNumber * 30;
     
     while (choices.length < 4) {
       int wrongAnswer;
       if (random.nextBool()) {
         // Generate close wrong answers
-        wrongAnswer = correctAnswer + random.nextInt(10) - 5;
+        wrongAnswer = correctAnswer + random.nextInt(11) - 5; // +/- 5
       } else {
-        // Generate random wrong answers
-        wrongAnswer = random.nextInt(144) + 1;
+        // Generate random wrong answers within the table range
+        wrongAnswer = random.nextInt(maxAnswer) + 1;
       }
       
-      if (wrongAnswer > 0 && !choices.contains(wrongAnswer)) {
+      if (wrongAnswer > 0 && wrongAnswer != correctAnswer && !choices.contains(wrongAnswer)) {
         choices.add(wrongAnswer);
       }
     }
@@ -149,6 +150,10 @@ class _LessonScreenState extends State<LessonScreen>
       appState.gainStar();
     } else {
       appState.loseLife();
+      if (appState.currentLives <= 0) {
+        _showGameOverDialog();
+        return;
+      }
     }
     
     _feedbackController.forward().then((_) {
@@ -194,37 +199,43 @@ class _LessonScreenState extends State<LessonScreen>
     final isTablet = screenSize.width > 600;
     final currentQuestion = questions[currentQuestionIndex];
     
-    return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFFF3E5F5),
-              Color(0xFFE1BEE7),
-              Color(0xFFCE93D8),
-            ],
+    return WillPopScope(
+      onWillPop: () async {
+        appState.resetLives();
+        return true;
+      },
+      child: Scaffold(
+        body: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFFF3E5F5),
+                Color(0xFFE1BEE7),
+                Color(0xFFCE93D8),
+              ],
+            ),
           ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              // Header with progress and lives
-              _buildHeader(isTablet),
-              
-              // Question content
-              Expanded(
-                child: Container(
-                  margin: const EdgeInsets.all(20),
-                  child: showFeedback
-                      ? _buildFeedbackWidget(isTablet)
-                      : _buildQuestionWidget(currentQuestion, isTablet),
+          child: SafeArea(
+            child: Column(
+              children: [
+                // Header with progress and lives
+                _buildHeader(isTablet),
+                
+                // Question content
+                Expanded(
+                  child: Container(
+                    margin: const EdgeInsets.all(20),
+                    child: showFeedback
+                        ? _buildFeedbackWidget(isTablet)
+                        : _buildQuestionWidget(currentQuestion, isTablet),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -241,7 +252,10 @@ class _LessonScreenState extends State<LessonScreen>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               IconButton(
-                onPressed: () => Navigator.of(context).pop(),
+                onPressed: () {
+                  appState.resetLives();
+                  Navigator.of(context).pop();
+                },
                 icon: Icon(
                   Icons.close,
                   size: isTablet ? 32 : 24,
@@ -493,6 +507,7 @@ class _LessonScreenState extends State<LessonScreen>
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
+                  appState.resetLives();
                   Navigator.of(context).pop();
                   Navigator.of(context).pop();
                 },
@@ -550,6 +565,87 @@ class _LessonScreenState extends State<LessonScreen>
           ),
         ),
       ],
+    );
+  }
+
+  void _showGameOverDialog() {
+    final screenSize = MediaQuery.of(context).size;
+    final bool isTablet = screenSize.width > 600;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          child: Container(
+            padding: const EdgeInsets.all(30),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: isTablet ? 100 : 80,
+                  height: isTablet ? 100 : 80,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(15),
+                    child: Image.asset(
+                      'assets/images/dash_character_glasses.png',
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  'Game Over',
+                  style: TextStyle(
+                    fontSize: isTablet ? 28 : 24,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFFD32F2F),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'You have run out of hearts. Start again from the home page.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: isTablet ? 18 : 16,
+                    color: Colors.grey[700],
+                  ),
+                ),
+                const SizedBox(height: 30),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      appState.resetLives();
+                      Navigator.of(context).pop(); // close dialog
+                      Navigator.of(context).pop(); // back to home
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFD32F2F),
+                      padding: EdgeInsets.symmetric(vertical: isTablet ? 15 : 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                    ),
+                    child: Text(
+                      'START AGAIN',
+                      style: TextStyle(
+                        fontSize: isTablet ? 20 : 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
