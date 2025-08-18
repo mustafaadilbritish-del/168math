@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math';
 import 'package:flutter/services.dart';
 import '../models/app_state.dart';
 
@@ -423,7 +424,7 @@ class _FollowPatternWidgetState extends State<FollowPatternWidget> {
     while (optionSet.length < 4) {
       int candidate;
       if (random.nextBool()) {
-        candidate = correct + (random.nextInt(11) - 5); // +/- 5
+        candidate = (correct + (random.nextInt(11) - 5)).toInt(); // +/- 5
       } else {
         candidate = random.nextInt(maxAnswer) + 1; // 1..max
       }
