@@ -373,23 +373,19 @@ class FollowPatternWidget extends StatefulWidget {
 }
 
 class _FollowPatternWidgetState extends State<FollowPatternWidget> {
-  final TextEditingController _controller = TextEditingController();
-  final FocusNode _focusNode = FocusNode();
   late List<Map<String, dynamic>> patternData;
+  late List<int> _options;
+  int? _selectedIndex;
 
   @override
   void initState() {
     super.initState();
     _generatePatternData();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _focusNode.requestFocus();
-    });
+    _generateOptions();
   }
 
   @override
   void dispose() {
-    _controller.dispose();
-    _focusNode.dispose();
     super.dispose();
   }
 
@@ -416,6 +412,27 @@ class _FollowPatternWidgetState extends State<FollowPatternWidget> {
         'isTarget': isTarget,
       });
     }
+  }
+
+  void _generateOptions() {
+    final int correct = widget.question.multiplicand * widget.question.multiplier;
+    final int maxAnswer = widget.question.multiplicand * 30;
+    final Set<int> optionSet = {correct};
+    final random = Random();
+
+    while (optionSet.length < 4) {
+      int candidate;
+      if (random.nextBool()) {
+        candidate = correct + (random.nextInt(11) - 5); // +/- 5
+      } else {
+        candidate = random.nextInt(maxAnswer) + 1; // 1..max
+      }
+      if (candidate > 0 && candidate != correct) {
+        optionSet.add(candidate);
+      }
+    }
+
+    _options = optionSet.toList()..shuffle(random);
   }
 
   @override
@@ -515,46 +532,27 @@ class _FollowPatternWidgetState extends State<FollowPatternWidget> {
         
         const SizedBox(height: 40),
         
-        // Answer input
+        // Four square options (2x2)
         SizedBox(
-          width: widget.isTablet ? 150 : 120,
-          child: TextField(
-            controller: _controller,
-            focusNode: _focusNode,
-            keyboardType: TextInputType.number,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: widget.isTablet ? 28 : 24,
-              fontWeight: FontWeight.bold,
-              color: const Color(0xFF1976D2),
-            ),
-            decoration: InputDecoration(
-              hintText: '?',
-              hintStyle: TextStyle(
-                color: Colors.grey[400],
-                fontSize: widget.isTablet ? 28 : 24,
+          width: double.infinity,
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(child: _buildOptionButton(0)),
+                  const SizedBox(width: 12),
+                  Expanded(child: _buildOptionButton(1)),
+                ],
               ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
-                borderSide: const BorderSide(color: Color(0xFF2196F3), width: 2),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(child: _buildOptionButton(2)),
+                  const SizedBox(width: 12),
+                  Expanded(child: _buildOptionButton(3)),
+                ],
               ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
-                borderSide: const BorderSide(color: Color(0xFF2196F3), width: 3),
-              ),
-              filled: true,
-              fillColor: Colors.white,
-              contentPadding: EdgeInsets.symmetric(
-                vertical: widget.isTablet ? 15 : 12,
-                horizontal: 15,
-              ),
-            ),
-            onSubmitted: (value) {
-              if (value.isNotEmpty) {
-                widget.onSubmit(value);
-              }
-            },
+            ],
           ),
         ),
         
@@ -564,11 +562,11 @@ class _FollowPatternWidgetState extends State<FollowPatternWidget> {
         SizedBox(
           width: widget.isTablet ? 200 : 150,
           child: ElevatedButton(
-            onPressed: () {
-              if (_controller.text.isNotEmpty) {
-                widget.onSubmit(_controller.text);
-              }
-            },
+            onPressed: _selectedIndex != null
+                ? () {
+                    widget.onSubmit(_options[_selectedIndex!].toString());
+                  }
+                : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF4CAF50),
               padding: EdgeInsets.symmetric(vertical: widget.isTablet ? 15 : 12),
@@ -587,6 +585,37 @@ class _FollowPatternWidgetState extends State<FollowPatternWidget> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildOptionButton(int index) {
+    final bool isSelected = _selectedIndex == index;
+    final int value = _options[index];
+    return ElevatedButton(
+      onPressed: () {
+        setState(() {
+          _selectedIndex = index;
+        });
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: isSelected ? const Color(0xFF2196F3) : Colors.white,
+        foregroundColor: isSelected ? Colors.white : const Color(0xFF1976D2),
+        padding: EdgeInsets.symmetric(vertical: widget.isTablet ? 24 : 18),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+          side: BorderSide(
+            color: isSelected ? const Color(0xFF2196F3) : const Color(0xFF1976D2),
+            width: 2,
+          ),
+        ),
+      ),
+      child: Text(
+        '$value',
+        style: TextStyle(
+          fontSize: widget.isTablet ? 22 : 18,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
     );
   }
 }
