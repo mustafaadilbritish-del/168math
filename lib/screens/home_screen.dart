@@ -161,10 +161,24 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    // Small Dash character variations
-                    _buildBottomIcon(Icons.school, Colors.blue, isTablet),
-                    _buildBottomIcon(Icons.emoji_events, Colors.orange, isTablet),
-                    _buildBottomIcon(Icons.person, Colors.green, isTablet),
+                    _buildBottomIcon(
+                      Icons.school,
+                      Colors.blue,
+                      isTablet,
+                      onTap: () => Navigator.of(context).pushNamed('/about_developer'),
+                    ),
+                    _buildBottomIcon(
+                      Icons.emoji_events,
+                      Colors.orange,
+                      isTablet,
+                      onTap: () => Navigator.of(context).pushNamed('/roadmap'),
+                    ),
+                    _buildBottomIcon(
+                      Icons.person,
+                      Colors.green,
+                      isTablet,
+                      onTap: () => Navigator.of(context).pushNamed('/about_app'),
+                    ),
                   ],
                 ),
               ),
@@ -276,8 +290,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildBottomIcon(IconData icon, Color color, bool isTablet) {
-    return Container(
+  Widget _buildBottomIcon(IconData icon, Color color, bool isTablet, {VoidCallback? onTap}) {
+    final content = Container(
       width: isTablet ? 60 : 50,
       height: isTablet ? 60 : 50,
       decoration: BoxDecoration(
@@ -290,6 +304,8 @@ class _HomeScreenState extends State<HomeScreen> {
         size: isTablet ? 30 : 24,
       ),
     );
+    if (onTap == null) return content;
+    return GestureDetector(onTap: onTap, child: content);
   }
 
   List<Color> _getTableColors(int tableNumber) {

@@ -403,7 +403,8 @@ class _FollowPatternWidgetState extends State<FollowPatternWidget> {
     int start = targetMultiplier - 2;
     if (start < 1) start = 1;
     if (start + 3 > maxMultiplier) {
-      start = (maxMultiplier - 3).clamp(1, maxMultiplier - 3);
+      final int adjusted = maxMultiplier - 3;
+      start = adjusted < 1 ? 1 : adjusted;
     }
 
     for (int i = 0; i < 4; i++) {

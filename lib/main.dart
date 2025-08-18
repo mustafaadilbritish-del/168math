@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'screens/splash_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/lesson_screen.dart';
+import 'screens/info_screens.dart';
 
 void main() {
   runApp(const DashMathApp());
@@ -30,6 +31,9 @@ class DashMathApp extends StatelessWidget {
       routes: {
         '/home': (context) => const HomeScreen(),
         '/lesson': (context) => const LessonScreen(),
+        '/about_app': (context) => const AboutAppScreen(),
+        '/about_developer': (context) => const AboutDeveloperScreen(),
+        '/roadmap': (context) => const RoadmapScreen(),
       },
       debugShowCheckedModeBanner: false,
     );
