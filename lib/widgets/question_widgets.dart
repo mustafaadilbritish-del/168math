@@ -24,6 +24,7 @@ class _TypeAnswerWidgetState extends State<TypeAnswerWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isTablet = widget.isTablet;
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -540,17 +541,17 @@ class _FollowPatternWidgetState extends State<FollowPatternWidget> {
             children: [
               Row(
                 children: [
-                  Expanded(child: _buildOptionButton(0)),
+                  Expanded(child: _buildOptionButton(0, isTablet)),
                   const SizedBox(width: 12),
-                  Expanded(child: _buildOptionButton(1)),
+                  Expanded(child: _buildOptionButton(1, isTablet)),
                 ],
               ),
               const SizedBox(height: 12),
               Row(
                 children: [
-                  Expanded(child: _buildOptionButton(2)),
+                  Expanded(child: _buildOptionButton(2, isTablet)),
                   const SizedBox(width: 12),
-                  Expanded(child: _buildOptionButton(3)),
+                  Expanded(child: _buildOptionButton(3, isTablet)),
                 ],
               ),
             ],
@@ -589,7 +590,7 @@ class _FollowPatternWidgetState extends State<FollowPatternWidget> {
     );
   }
 
-  Widget _buildOptionButton(int index) {
+  Widget _buildOptionButton(int index, bool isTablet) {
     final bool isSelected = _selectedIndex == index;
     final int value = _options[index];
     return ElevatedButton(
@@ -601,7 +602,7 @@ class _FollowPatternWidgetState extends State<FollowPatternWidget> {
       style: ElevatedButton.styleFrom(
         backgroundColor: isSelected ? const Color(0xFF2196F3) : Colors.white,
         foregroundColor: isSelected ? Colors.white : const Color(0xFF1976D2),
-        padding: EdgeInsets.symmetric(vertical: widget.isTablet ? 24 : 18),
+        padding: EdgeInsets.symmetric(vertical: isTablet ? 24 : 18),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
           side: BorderSide(
@@ -613,7 +614,7 @@ class _FollowPatternWidgetState extends State<FollowPatternWidget> {
       child: Text(
         '$value',
         style: TextStyle(
-          fontSize: widget.isTablet ? 22 : 18,
+          fontSize: isTablet ? 22 : 18,
           fontWeight: FontWeight.bold,
         ),
       ),
