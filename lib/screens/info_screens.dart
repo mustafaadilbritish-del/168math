@@ -167,13 +167,66 @@ class AboutDeveloperScreen extends StatelessWidget {
       title: 'About the Developer',
       icon: Icons.school,
       gradientColors: const [Color(0xFFF3E5F5), Color(0xFFE1BEE7), Color(0xFFCE93D8)],
-      child: Text(
-        _text,
-        style: TextStyle(
-          fontSize: isTablet ? 20 : 16,
-          height: 1.6,
-          color: const Color(0xFF37474F),
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            _text,
+            style: TextStyle(
+              fontSize: isTablet ? 20 : 16,
+              height: 1.6,
+              color: const Color(0xFF37474F),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Divider(color: Colors.grey[300], thickness: 1),
+          const SizedBox(height: 16),
+          Text(
+            'Feedback & More Info',
+            style: TextStyle(
+              fontSize: isTablet ? 22 : 18,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF1976D2),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFE3F2FD),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.phone, color: Color(0xFF2E7D32)),
+                    const SizedBox(width: 10),
+                    const Text(
+                      '+249900447084',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    const Spacer(),
+                    const Icon(Icons.chat_bubble, color: Color(0xFF2E7D32)),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: const [
+                    Icon(Icons.email, color: Color(0xFF1565C0)),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'mustafaadilbritish@gmail.com',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
